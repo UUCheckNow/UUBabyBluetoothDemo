@@ -7,6 +7,9 @@
 //
 
 #import "AppDelegate.h"
+#import "HomeViewController.h"
+//#import "UUTableViewController.h"
+//#import "UUCustomTableVC.h"
 
 @interface AppDelegate ()
 
@@ -17,8 +20,50 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    
+    //tabbar文字颜色
+    [[UITabBar appearance]setTintColor:[UIColor colorWithRed:233/255.0 green:80/255.0 blue:255/255.0 alpha:1]];
+    
+    self.window.backgroundColor = [UIColor whiteColor];
+    
+    [self.window makeKeyAndVisible];
+    
+    [self createViews];
+
+    
     return YES;
 }
+
+- (void)createViews {
+    
+    HomeViewController *homeView = [HomeViewController new];
+    UINavigationController *homeNavg = [[UINavigationController alloc]initWithRootViewController:homeView];
+    homeNavg.tabBarItem.image = [[UIImage imageNamed:@"Recommend_nor"]imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    //给 tabBarItem 设置选中时的图片
+    homeNavg.tabBarItem.selectedImage = [[UIImage imageNamed:@"Recommend_h"]imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    homeView.title = @"首页";
+    
+//    UUTableViewController *uuTableVC = [UUTableViewController new];
+//    UINavigationController *uuTableNavg = [[UINavigationController alloc]initWithRootViewController:uuTableVC];
+//    uuTableNavg.tabBarItem.image = [[UIImage imageNamed:@"Recommend_nor"]imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+//    //给 tabBarItem 设置选中时的图片
+//    uuTableNavg.tabBarItem.selectedImage = [[UIImage imageNamed:@"Recommend_h"]imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+//    uuTableVC.title = @"测试";
+//    
+//    UUCustomTableVC *uucustomV = [UUCustomTableVC new];
+//    UINavigationController *uucustomNavg = [[UINavigationController alloc]initWithRootViewController:uucustomV];
+//    uucustomNavg.tabBarItem.image = [[UIImage imageNamed:@"Recommend_nor"]imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+//    //给 tabBarItem 设置选中时的图片
+//    uucustomNavg.tabBarItem.selectedImage = [[UIImage imageNamed:@"Recommend_h"]imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+//    uucustomV.title = @"全部内容";
+    
+    UITabBarController *tabBarController = [[UITabBarController alloc]init];
+    tabBarController.viewControllers = @[homeNavg];
+    self.window.rootViewController = tabBarController;
+}
+
 
 
 - (void)applicationWillResignActive:(UIApplication *)application {

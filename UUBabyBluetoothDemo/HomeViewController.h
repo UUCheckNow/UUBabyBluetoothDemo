@@ -1,5 +1,5 @@
 //
-//  ViewController.h
+//  HomeViewController.h
 //  UUBabyBluetoothDemo
 //
 //  Created by lhn on 17/1/5.
@@ -11,7 +11,6 @@
 #import "BabyBluetooth.h"
 #import "PeripheralViewContriller.h"
 
-@interface ViewController : UIViewController
+@interface HomeViewController : UIViewController
 
 @end
-

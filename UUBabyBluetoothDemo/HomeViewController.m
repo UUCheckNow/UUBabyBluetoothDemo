@@ -1,54 +1,29 @@
 //
-//  ViewController.m
+//  HomeViewController.m
 //  UUBabyBluetoothDemo
 //
 //  Created by lhn on 17/1/5.
 //  Copyright © 2017年 lhn. All rights reserved.
 //
 
-#import "ViewController.h"
+#import "HomeViewController.h"
 #import "SVProgressHUD.h"
 #import "BabyBluetooth.h"
 
-//screen width and height
 #define width [UIScreen mainScreen].bounds.size.width
 #define height [UIScreen mainScreen].bounds.size.height
 
-typedef NS_ENUM(NSInteger,BluetoothState) {
-    BluetoothStateDisconnect = 0,
-    BluetoothStateScanSuccess,
-    BluetoothStateScaning,
-    BluetoothStateConnected,
-    BluetoothStateConnecting
-};
-
-typedef NS_ENUM(NSInteger,BluetoohFailState) {
-    BluetoothFailStateUnExit = 0,
-    BluetoohFailStateUnKnow,
-    BluetoohFailStateByHW,
-    BluetoohFailStateByOff,
-    BluetoohFailStateUnauthorized,
-    BluetoohFailStateByTimeout
-};
-
-@interface ViewController () <UITableViewDelegate,UITableViewDataSource> {
+@interface HomeViewController ()<UITableViewDelegate,UITableViewDataSource> {
     NSMutableArray *peripherals;
     NSMutableArray *peripheralsAD;
     BabyBluetooth *baby;
 }
 
 @property(strong,nonatomic)UITableView *tableview;
-@property(strong,nonatomic)CBCentralManager *manager;//中央设备
-@property(assign,nonatomic)BluetoohFailState bluetoothFailState;
-@property(assign,nonatomic)BluetoothState bluetoothState;
-@property(strong,nonatomic)CBPeripheral *discoveredPeripheral;//周边设备
-@property(strong,nonatomic)CBCharacteristic *characteristic1;//周边设备服务特性
-@property(strong,nonatomic)NSMutableArray *BleViewPerArr;
-
 
 @end
 
-@implementation ViewController
+@implementation HomeViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -65,7 +40,7 @@ typedef NS_ENUM(NSInteger,BluetoohFailState) {
     //设置蓝牙委托
     [self babyDelegate];
     
-
+    
     
     // Do any additional setup after loading the view, typically from a nib.
 }
@@ -93,7 +68,7 @@ typedef NS_ENUM(NSInteger,BluetoohFailState) {
     [baby setBlockOnCentralManagerDidUpdateState:^(CBCentralManager *central) {
         if (central.state == CBManagerStatePoweredOn) {
             [SVProgressHUD showInfoWithStatus:@"设备打开成功，开始扫描设备"];
-            
+            //扫描设备 然后读取服务,然后读取characteristics名称和值和属性，获取characteristics对应的description的名称和值
             baby.scanForPeripherals().connectToPeripherals().discoverServices().discoverCharacteristics().readValueForCharacteristic().discoverDescriptorsForCharacteristic().readValueForDescriptors().begin;
         }
     }];
@@ -101,6 +76,7 @@ typedef NS_ENUM(NSInteger,BluetoohFailState) {
     //设置扫描到设备的委托
     [baby setBlockOnDiscoverToPeripherals:^(CBCentralManager *central, CBPeripheral *peripheral, NSDictionary *advertisementData, NSNumber *RSSI) {
         NSLog(@"搜索到了设备:%@",peripheral.name);
+        
         [weakSelf insertTableView:peripheral advertisementData:advertisementData];
         
     }];
@@ -155,31 +131,34 @@ typedef NS_ENUM(NSInteger,BluetoohFailState) {
     
     //设置查找设备的过滤器
     
-//    [baby setFilterOnDiscoverPeripherals:^BOOL(NSString *peripheralName) {
-//        
-//        //设置查找规则是名称大于1 ， the search rule is peripheral.name length > 2
-//        if (peripheralName.length >2) {
-//            return YES;
-//        }
-//        return NO;
-//    }];
-//    
     [baby setFilterOnDiscoverPeripherals:^BOOL(NSString *peripheralName, NSDictionary *advertisementData, NSNumber *RSSI) {
-        //设置查找规则是名称大于1 ， the search rule is peripheral.name length > 2
-        if (peripheralName.length >2) {
+        //设置查找规则是名称大于1 ， the search rule is peripheral.name length > 1
+        
+        
+        //BabyBluetooth中指定services
+        NSMutableArray *servicedUUID = [NSMutableArray arrayWithObject:[CBUUID UUIDWithString:@"FFF0"]];
+        
+        if([servicedUUID isEqual:[CBUUID UUIDWithString:@"0xFFF0"]]) {
+            NSLog(@"qwertyuikjhgfcdxscvbnhhahah哈哈哈哈");
+        }
+        //设置babybluetooth运行时参数
+        [baby setBabyOptionsWithScanForPeripheralsWithOptions:nil connectPeripheralWithOptions:nil scanForPeripheralsWithServices:servicedUUID discoverWithServices:nil discoverWithCharacteristics:nil];
+        
+        
+        if (peripheralName.length >1) {
             return YES;
         }
         return NO;
     }];
-    
+
     
     [baby setBlockOnCancelAllPeripheralsConnectionBlock:^(CBCentralManager *centralManager) {
         NSLog(@"setBlockOnCancelAllPeripheralsConnectionBlock");
     }];
     
-//    [baby setBlockOnCancelPeripheralConnectionBlock:^(CBCentralManager *centralManager, CBPeripheral *peripheral) {
-//        NSLog(@"setBlockOnCancelPeripheralConnectionBlock");
-//    }];
+    //    [baby setBlockOnCancelPeripheralConnectionBlock:^(CBCentralManager *centralManager, CBPeripheral *peripheral) {
+    //        NSLog(@"setBlockOnCancelPeripheralConnectionBlock");
+    //    }];
     
     [baby setBlockOnCancelAllPeripheralsConnectionBlock:^(CBCentralManager *centralManager) {
         NSLog(@"setBlockOnCancelPeripheralConnectionBlock");
@@ -203,7 +182,7 @@ typedef NS_ENUM(NSInteger,BluetoohFailState) {
     
     //示例:
     //扫描选项->CBCentralManagerScanOptionAllowDuplicatesKey:忽略同一个Peripheral端的多个发现事件被聚合成一个发现事件
-//    NSDictionary *scanForPeripheralsWithOptions = @{CBCentralManagerScanOptionAllowDuplicatesKey:@YES};
+    //    NSDictionary *scanForPeripheralsWithOptions = @{CBCentralManagerScanOptionAllowDuplicatesKey:@YES};
     //连接设备->
     //    [baby setBabyOptionsWithScanForPeripheralsWithOptions:scanForPeripheralsWithOptions connectPeripheralWithOptions:nil scanForPeripheralsWithServices:nil discoverWithServices:nil discoverWithCharacteristics:nil];
     
@@ -282,8 +261,7 @@ typedef NS_ENUM(NSInteger,BluetoohFailState) {
     PeripheralViewContriller *vc = [[PeripheralViewContriller alloc]init];
     vc.currPeripheral = [peripherals objectAtIndex:indexPath.row];
     vc->baby = self->baby;
-    [self.navigationController presentationController];
-//    [self.navigationController pushViewController:vc animated:YES];
+    [self.navigationController pushViewController:vc animated:YES];
     
 }
 
@@ -292,5 +270,14 @@ typedef NS_ENUM(NSInteger,BluetoohFailState) {
     // Dispose of any resources that can be recreated.
 }
 
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
 
 @end
